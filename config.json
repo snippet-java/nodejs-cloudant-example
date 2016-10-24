@@ -1,0 +1,7 @@
+{
+	"cloudant" : {
+		"username" : "313d6562-626e-4edc-855f-528c7bba73e3-bluemix",
+  		"password" : "38fdea42f285bd146e7a7d2baa15f91dc486dababd609a1c61e3b2a2452aa55a",
+  		"dbName" : "student"
+  	}
+}
