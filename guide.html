@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Loading Nodered Documentation</title>
+    <link rel="stylesheet" type="text/css" href="/js/themes/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/js/themes/icon.css">
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.easyui.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/js/themes/ribbon.css">
+    <link rel="stylesheet" type="text/css" href="/js/themes/ribbon-icon.css">
+    <script type="text/javascript" src="/js/jquery.ribbon.js"></script>
+    <script type="text/javascript" src="/js/index.js"></script>
+</head>
+
+<body>
+    <div class="easyui-accordion">
+        <div title="About" data-options="iconCls:'icon-ok',collapsed:false" style="overflow:auto;padding:10px;">
+            <h3 style="color:#0099FF;">About</h3>
+            <p>
+                Cloudant NoSQL DB provides access to a fully managed NoSQL JSON data layer that's always on. This service is compatible with CouchDB, and accessible through a simple to use HTTP interface for mobile and web application models
+            </p>
+        </div>
+        <div title="Video and Documentation" data-options="iconCls:'icon-help'" style="padding:10px;">
+            <h3 style="color:#0099FF;">Video</h3>
+            <iframe width="420" height="315" src="https://www.youtube.com/embed/8BBN3BWkmMM" frameborder="0" allowfullscreen></iframe>
+
+            <h3 style="color:#0099FF;">Documentation</h3>
+            <p>For documentation visit <a target="_blank" href="https://console.ng.bluemix.net/docs/services/Cloudant/index.html#Cloudant">IBM Cloudant Documentation</a>
+            </p>
+        </div>
+        <div title="Code Walkthrough" data-options="iconCls:'icon-help',collapsed:false" style="padding:10px;">
+            <p>Username and password need to be obtained by creating Cloudant NoSQL DB Service at :<a target="_blank" href="https://console.ng.bluemix.net/catalog/services/cloudant-nosql-db/">Cloudant NoSQL DB Service</a></p>
+            <h3 style="color:#0099FF;">Code Walkthrough</h3>
+            <ol>
+                <li>When you run the code the username and password is expected to be set for the Cloudant NoSQL DB Service to be used.</li>
+                <li>Go to cloudant dashboard (http://username.cloudant.com/dashboard.html) and create a database with a few documents</li>
+                <li>Replace Doc ID with _ID field of Cloudant document and execute. It retrieves all fields with values</li>
+
+            </ol>
+
+        </div>
+    </div>
+</body>
+
+</html>
