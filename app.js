@@ -1,4 +1,5 @@
 var express = require('express');
+var hogan = require('hogan-express');
 var http = require('http');
 var path = require('path');
 //DynamicRoutes = require('dynamic-routes'),
@@ -34,13 +35,13 @@ app.get(["/createdb"], function(req, res) {
 	var name = req.query.dbname || config.cloudant.dbName || "";
 	cloudant.db.create(name, function(err, data) {
 		if (err) {
-			res.send("error: " + JSON.stringify(err));
+			res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
 			return;
 		}
 		
 		db = cloudant.db.use(name);
-		
-		res.send("data: " + JSON.stringify(data));
+
+		res.render('template.html', "data:\n\n" + JSON.stringify(data, null, 4));
 	});
 })
 
@@ -54,11 +55,11 @@ app.get(["/create","/insert","/add"], function(req, res) {
 	}
 	db.insert(doc, function(err, data) {
 		if (err) {
-			res.send("error: " + JSON.stringify(err));
+			res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
 			return;
 		}
-		
-		res.send("doc: " + JSON.stringify(doc) + "\n\ndata: " + JSON.stringify(data));
+
+		res.render('template.html', "doc:\n\n" + JSON.stringify(doc, null, 4) + "\n\ndata:\n\n" + JSON.stringify(data, null, 4));
 	});
 })
 
@@ -69,7 +70,7 @@ app.get(["/list"], function(req, res) {
 			return;
 		}
 		
-		res.send("data: " + JSON.stringify(data, null, 4));
+		res.render('template.html', "data:\n\n" + JSON.stringify(data, null, 4));
 	});
 })
 
@@ -78,27 +79,27 @@ app.get(["/read"], function(req, res) {
 	if (_id != "") {
 		db.get(_id, function(err, data) {
 			if (err) {
-				res.send("error: " + JSON.stringify(err));
+				res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
 				return;
 			}
 
-			res.send("data: " + JSON.stringify(data));
+			res.render('template.html', "data:\n\n" + JSON.stringify(data, null, 4));
 		});
 	} else {
 		db.list(function(err, data) {
 			if (err) {
-				res.send("error: " + JSON.stringify(err));
+				res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
 				return;
 			}
 			
 			var doc = data.rows[Math.floor(data.rows.length*Math.random())];
 			db.get(doc.id, function(err, data) {
 				if (err) {
-					res.send("error: " + JSON.stringify(err));
+					res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
 					return;
 				}
 
-				res.send("data: " + JSON.stringify(data));
+				res.render('template.html', "data:\n\n" + JSON.stringify(data, null, 4));
 			});
 		});
 	}
@@ -108,7 +109,7 @@ app.get(["/update","/modify"], function(req, res) {
 	var _id = req.query._id || req.query.id || "";
 	db.get(_id, function(err, data) {
 		if (err) {
-			res.send("error: " + JSON.stringify(err));
+			res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
 			return;
 		}
 		
@@ -118,11 +119,11 @@ app.get(["/update","/modify"], function(req, res) {
 		}
 		db.insert(doc, function(err, data) {
 			if (err) {
-				res.send("error: " + JSON.stringify(err));
+				res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
 				return;
 			}
-			
-			res.send("doc: " + JSON.stringify(doc) + "\n\ndata: " + JSON.stringify(data));
+
+			res.render('template.html', "doc:\n\n" + JSON.stringify(doc, null, 4) + "data:\n\n" + JSON.stringify(data, null, 4));
 		});
 	});
 })
@@ -132,23 +133,21 @@ app.get(["/delete","/destroy","/remove"], function(req, res) {
 	var _id = req.query._id || req.query.id || "";
 	db.get(_id, function(err, data) {
 		if (err) {
-			res.send("error: " + JSON.stringify(err));
+			res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
 			return;
 		}
 		
 		var doc = data;
 		db.destroy(doc._id, doc._rev, function(err, data) {
 			if (err) {
-				res.send("error: " + JSON.stringify(err));
+				res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
 				return;
 			}
-			
-			res.send("doc: " + JSON.stringify(doc) + "\n\ndata: " + JSON.stringify(data));
+
+			res.render('template.html', "deleted doc:\n\n" + JSON.stringify(doc, null, 4) + "data:\n\n" + JSON.stringify(data, null, 4));
 		});
 	});
 })
-
-//DynamicRoutes(app, __dirname + '/src/');
 
 http.createServer(app).listen(app.get('port'), function(){
 	console.log('Express server listening on port ' + app.get('port'));
