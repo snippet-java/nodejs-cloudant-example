@@ -4,14 +4,19 @@ var http = require('http');
 var path = require('path');
 //DynamicRoutes = require('dynamic-routes'),
 var app = express();
+
 var bodyParser = require('body-parser');
 
 var Cloudant = require('cloudant');
 
 app.set('port', process.env.PORT || 3000);
-//app.set('views', __dirname + '/views');
-
-app.use(bodyParser());
+app.set('views', __dirname + '/views');
+app.engine('html', hogan);
+app.set('view engine', 'html');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+	extended: true
+})); 
 app.use(express.static(path.join(__dirname, 'public')));
 
 var services = JSON.parse(process.env.VCAP_SERVICES) || {};
@@ -35,13 +40,15 @@ app.get(["/createdb"], function(req, res) {
 	var name = req.query.dbname || config.cloudant.dbName || "";
 	cloudant.db.create(name, function(err, data) {
 		if (err) {
-			res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
+			var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+			res.render('template.html', str);
 			return;
 		}
 		
 		db = cloudant.db.use(name);
 
-		res.render('template.html', "data:\n\n" + JSON.stringify(data, null, 4));
+		var str = {out : "data:\n\n" + JSON.stringify(data, null, 4)};
+		res.render('template.html', str);
 	});
 })
 
@@ -55,22 +62,26 @@ app.get(["/create","/insert","/add"], function(req, res) {
 	}
 	db.insert(doc, function(err, data) {
 		if (err) {
-			res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
+			var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+			res.render('template.html', str);
 			return;
 		}
 
-		res.render('template.html', "doc:\n\n" + JSON.stringify(doc, null, 4) + "\n\ndata:\n\n" + JSON.stringify(data, null, 4));
+		var str = {out : "doc:\n\n" + JSON.stringify(doc, null, 4) + "\n\ndata:\n\n" + JSON.stringify(data, null, 4)};
+		res.render('template.html', str);
 	});
 })
 
 app.get(["/list"], function(req, res) {
 	db.list(function(err, data) {
 		if (err) {
-			res.send("error: " + JSON.stringify(err));
+			var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+			res.render('template.html', str);
 			return;
 		}
 		
-		res.render('template.html', "data:\n\n" + JSON.stringify(data, null, 4));
+		var str = {out : "data:\n\n" + JSON.stringify(data, null, 4)};
+		res.render('template.html', str);
 	});
 })
 
@@ -79,27 +90,32 @@ app.get(["/read"], function(req, res) {
 	if (_id != "") {
 		db.get(_id, function(err, data) {
 			if (err) {
-				res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
+				var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+				res.render('template.html', str);
 				return;
 			}
 
-			res.render('template.html', "data:\n\n" + JSON.stringify(data, null, 4));
+			var str = {out : "data:\n\n" + JSON.stringify(data, null, 4)};
+			res.render('template.html', str);
 		});
 	} else {
 		db.list(function(err, data) {
 			if (err) {
-				res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
+				var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+				res.render('template.html', str);
 				return;
 			}
 			
 			var doc = data.rows[Math.floor(data.rows.length*Math.random())];
 			db.get(doc.id, function(err, data) {
 				if (err) {
-					res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
+					var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+					res.render('template.html', str);
 					return;
 				}
 
-				res.render('template.html', "data:\n\n" + JSON.stringify(data, null, 4));
+				var str = {out : "doc:\n\n" + JSON.stringify(doc, null, 4) + "\n\ndata:\n\n" + JSON.stringify(data, null, 4)};
+				res.render('template.html', str);
 			});
 		});
 	}
@@ -107,46 +123,118 @@ app.get(["/read"], function(req, res) {
 
 app.get(["/update","/modify"], function(req, res) {
 	var _id = req.query._id || req.query.id || "";
-	db.get(_id, function(err, data) {
-		if (err) {
-			res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
-			return;
-		}
-		
-		var doc = data;
-		for (var key in req.query) {
-			doc[key] = req.query[key]
-		}
-		db.insert(doc, function(err, data) {
+	if (_id != "") {
+		db.get(_id, function(err, data) {
 			if (err) {
-				res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
+				var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+				res.render('template.html', str);
 				return;
 			}
-
-			res.render('template.html', "doc:\n\n" + JSON.stringify(doc, null, 4) + "data:\n\n" + JSON.stringify(data, null, 4));
+			
+			var doc = data;
+			for (var key in req.query) {
+				doc[key] = req.query[key]
+			}
+			db.insert(doc, function(err, data) {
+				if (err) {
+					var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+					res.render('template.html', str);
+					return;
+				}
+	
+				var str = {out : "doc:\n\n" + JSON.stringify(doc, null, 4) + "\n\ndata:\n\n" + JSON.stringify(data, null, 4)};
+				res.render('template.html', str);
+			});
 		});
-	});
+	} else {
+		db.list(function(err, data) {
+			if (err) {
+				var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+				res.render('template.html', str);
+				return;
+			}
+			
+			var doc = data.rows[Math.floor(data.rows.length*Math.random())];
+			db.get(doc.id, function(err, data) {
+				if (err) {
+					var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+					res.render('template.html', str);
+					return;
+				}
+				
+				var doc = data;
+				for (var key in req.query) {
+					doc[key] = req.query[key]
+				}
+				db.insert(doc, function(err, data) {
+					if (err) {
+						var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+						res.render('template.html', str);
+						return;
+					}
+		
+					var str = {out : "doc:\n\n" + JSON.stringify(doc, null, 4) + "\n\ndata:\n\n" + JSON.stringify(data, null, 4)};
+					res.render('template.html', str);
+				});
+			});
+		});
+	}
 })
 
 
 app.get(["/delete","/destroy","/remove"], function(req, res) {
 	var _id = req.query._id || req.query.id || "";
-	db.get(_id, function(err, data) {
-		if (err) {
-			res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
-			return;
-		}
-		
-		var doc = data;
-		db.destroy(doc._id, doc._rev, function(err, data) {
+
+	if (_id != "") {
+		db.get(_id, function(err, data) {
 			if (err) {
-				res.render('template.html', "error:\n\n" + JSON.stringify(err, null, 4));
+				var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+				res.render('template.html', str);
 				return;
 			}
-
-			res.render('template.html', "deleted doc:\n\n" + JSON.stringify(doc, null, 4) + "data:\n\n" + JSON.stringify(data, null, 4));
+			
+			var doc = data;
+			db.destroy(doc._id, doc._rev, function(err, data) {
+				if (err) {
+					var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+					res.render('template.html', str);
+					return;
+				}
+	
+				var str = {out : "deleted doc:\n\n" + JSON.stringify(doc, null, 4) + "\n\ndata:\n\n" + JSON.stringify(data, null, 4)};
+				res.render('template.html', str);
+			});
 		});
-	});
+	} else {
+		db.list(function(err, data) {
+			if (err) {
+				var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+				res.render('template.html', str);
+				return;
+			}
+			
+			var doc = data.rows[Math.floor(data.rows.length*Math.random())];
+			db.get(doc.id, function(err, data) {
+				if (err) {
+					var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+					res.render('template.html', str);
+					return;
+				}
+				
+				var doc = data;
+				db.destroy(doc._id, doc._rev, function(err, data) {
+					if (err) {
+						var str = {out : "error:\n\n" + JSON.stringify(err, null, 4)};
+						res.render('template.html', str);
+						return;
+					}
+		
+					var str = {out : "deleted doc:\n\n" + JSON.stringify(doc, null, 4) + "\n\ndata:\n\n" + JSON.stringify(data, null, 4)};
+					res.render('template.html', str);
+				});
+			});
+		});
+	}
 })
 
 http.createServer(app).listen(app.get('port'), function(){
